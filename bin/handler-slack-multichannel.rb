@@ -94,7 +94,7 @@ class Slack < Sensu::Handler
   end
 
   def message_template
-    get_setting('template') || get_setting('message_template')
+    get_setting('template') || get_setting('message_template') || @event['check']["message_template"]
   end
 
   def slack_icon_url
@@ -257,6 +257,7 @@ class Slack < Sensu::Handler
 
     begin
       req = Net::HTTP::Post.new("#{uri.path}?#{uri.query}")
+      req.add_field('Content-Type', 'application/json')
       if payload_template.nil?
         text = slack_surround ? slack_surround + notice + slack_surround : notice
         req.body = payload(text, channel).to_json
